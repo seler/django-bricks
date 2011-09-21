@@ -7,4 +7,5 @@ syntax: regexp
 
 ^\.project
 ^\.pydevproject
+^\.settings/
 
