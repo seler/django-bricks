@@ -8,4 +8,4 @@ syntax: regexp
 ^\.project
 ^\.pydevproject
 ^\.settings/
-
+^example/media/

@@ -43,7 +43,7 @@ EMAIL_USE_TLS = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/home/seler/projects/django-bricks/django-bricks/example/sqlite.db', # Or path to database file if using sqlite3.
+        'NAME': '/home/seler/projects/django-bricks/sqlite.db', # Or path to database file if using sqlite3.
         'USER': '', # Not used with sqlite3.
         'PASSWORD': '', # Not used with sqlite3.
         'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
@@ -181,7 +181,7 @@ LOGOUT_URL = '/accounts/logout/'
 
 LOGIN_REDIRECT_URL = '/accounts/profile/'
 
-AUTH_PROFILE_MODULE = 'accounts.UserProfile'
+#AUTH_PROFILE_MODULE = 'accounts.UserProfile'
 
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -200,6 +200,7 @@ INSTALLED_APPS = [
 #    'tinymce',
 
     'bricks.core',
+    'bricks.media.images'
 #    'bricks.categories',
 #    'bricks.pages',
 #    'bricks.files',
@@ -218,42 +219,42 @@ INSTALLED_APPS = [
 #    ('flatpages/contact.html', gettext_noop('Contact page')),
 #)
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
-}
-
-# List of compiled regular expression objects representing User-Agent strings
-# that are not allowed to visit any page, systemwide. Use this for bad
-# robots/crawlers. Here are a few examples:
-import re
-DISALLOWED_USER_AGENTS = (
-    re.compile(r'^NaverBot.*'),
-    re.compile(r'^EmailSiphon.*'),
-    re.compile(r'^SiteSucker.*'),
-    re.compile(r'^sohu-search')
-)
+## A sample logging configuration. The only tangible logging
+## performed by this configuration is to send an email to
+## the site admins on every HTTP 500 error when DEBUG=False.
+## See http://docs.djangoproject.com/en/dev/topics/logging for
+## more details on how to customize your logging configuration.
+#LOGGING = {
+#    'version': 1,
+#    'disable_existing_loggers': False,
+#    'filters': {
+#        'require_debug_false': {
+#            '()': 'django.utils.log.RequireDebugFalse'
+#        }
+#    },
+#    'handlers': {
+#        'mail_admins': {
+#            'level': 'ERROR',
+#            'filters': ['require_debug_false'],
+#            'class': 'django.utils.log.AdminEmailHandler'
+#        }
+#    },
+#    'loggers': {
+#        'django.request': {
+#            'handlers': ['mail_admins'],
+#            'level': 'ERROR',
+#            'propagate': True,
+#        },
+#    }
+#}
+#
+## List of compiled regular expression objects representing User-Agent strings
+## that are not allowed to visit any page, systemwide. Use this for bad
+## robots/crawlers. Here are a few examples:
+#import re
+#DISALLOWED_USER_AGENTS = (
+#    re.compile(r'^NaverBot.*'),
+#    re.compile(r'^EmailSiphon.*'),
+#    re.compile(r'^SiteSucker.*'),
+#    re.compile(r'^sohu-search')
+#)
