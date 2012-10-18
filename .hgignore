@@ -9,3 +9,4 @@ syntax: regexp
 ^\.pydevproject
 ^\.settings/
 ^example/media/
+^bricks_video_test/media/
