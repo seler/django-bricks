@@ -33,21 +33,21 @@ def firstof(*items):
 
 class Video(models.Model):
     file = models.FileField(
-                    blank=True, null=True, storage=safe_storage,
-                    upload_to='bricks/videos/original',
-                    verbose_name=_(u'plik'),)
+        blank=True, null=True, storage=safe_storage,
+        upload_to='bricks/videos/original',
+        verbose_name=_(u'plik'),)
 
     #TODO: ForeignKey na models bricks.media.images
     screenshot = models.ImageField(
-            upload_to='bricks/videos/screenshot',
-            blank=True,
-            null=True,
-            verbose_name=_(u"screenshot"))
+        upload_to='bricks/videos/screenshot',
+        blank=True,
+        null=True,
+        verbose_name=_(u"screenshot"))
 
     screenshot_time = models.FloatField(
-                    default=3.,
-                    help_text=_(u'sekunda, z której zostanie zrobiony kadr'),
-                    verbose_name=_(u'czas kadru'))
+        default=3.,
+        help_text=_(u'sekunda, z której zostanie zrobiony kadr'),
+        verbose_name=_(u'czas kadru'))
 
     slug = models.SlugField(verbose_name=_('slug'))
 
