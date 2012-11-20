@@ -75,7 +75,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -85,7 +85,7 @@ SECRET_KEY = 'gn^2v*l9w(alc(3fzmh@!r^9)6!w$(cv&amp;erdq=0a57a!je)y@4'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -118,8 +118,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'bricks.core',
+    'bricks.collections',
     'bricks.media.videos',
     'djcelery',
+    'south',
 )
 
 import djcelery
@@ -149,7 +152,7 @@ GREP = '/bin/grep'
 GREP = '/bin/grep'
 QT_FASTSTART = '/usr/bin/qt-faststart'
 BRICKS_ALLOWED_VIDEO_FORMATS = ('3gp', 'avi', 'flv', 'mkv', 'mov', 'mp4', 'mpeg',
-                         'mpg', 'ogg', 'ogv', 'wmv')
+                                'mpg', 'ogg', 'ogv', 'wmv')
 BRICKS_DEFAULT_CONVERTEDVIDEO_FORMATS = (5, 6, 7)
 BRICKS_DEFAULT_CONVERTEDVIDEO_FORMAT = 6
 
@@ -164,16 +167,14 @@ BRICKS_VIDEO_FORMATS = {
         'slug': '270p',
         'codec': 'mp4',
         'extension': '.mp4',
-        1.78: {  # 16:9
-            'width': 480,
-            'height': 270},
-        1.33: {  # 4:3
-            'width': 360,
-            'height': 270},
-#        'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
-#                   '-b:v 300k -r 30 -acodec copy -b:a 64k -ac 2 -strict -2 -moov_size 30000 {format_filename}',
+        1.78: {'width': 480,
+               'height': 270},
+        1.33: {'width': 360,
+               'height': 270},
+        #   'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
+        #              '-b:v 300k -r 30 -acodec copy -b:a 64k -ac 2 -strict -2 -moov_size 30000 {format_filename}',
         'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
-                   '-b:v 300k -r 30 -acodec copy -b:a 64k -ac 2 -strict -2 {format_filename}',
+        '-b:v 300k -r 30 -acodec copy -b:a 64k -ac 2 -strict -2 {format_filename}',
         'fallback': None,
     },
 
@@ -182,16 +183,14 @@ BRICKS_VIDEO_FORMATS = {
         'slug': '360p',
         'codec': 'mp4',
         'extension': '.mp4',
-        1.78: {  # 16:9
-            'width': 640,
-            'height': 360},
-        1.33: {  # 4:3
-            'width': 478,
-            'height': 360},
-#        'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
-#                   '-b:v 512k -r 30 -acodec copy -b:a 96k -ac 2 -strict -2 -moov_size 30000 {format_filename}',
+        1.78: {'width': 640,
+               'height': 360},
+        1.33: {'width': 478,
+               'height': 360},
+        #        'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
+        #                   '-b:v 512k -r 30 -acodec copy -b:a 96k -ac 2 -strict -2 -moov_size 30000 {format_filename}',
         'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
-                   '-b:v 512k -r 30 -acodec copy -b:a 96k -ac 2 -strict -2 {format_filename}',
+        '-b:v 512k -r 30 -acodec copy -b:a 96k -ac 2 -strict -2 {format_filename}',
         'fallback': 1,
     },
 
@@ -200,16 +199,14 @@ BRICKS_VIDEO_FORMATS = {
         'slug': '576p',
         'codec': 'mp4',
         'extension': '.mp4',
-        1.78: {  # 16:9
-            'width': 1024,
-            'height': 576},
-        1.33: {  # 4:3
-            'width': 768,
-            'height': 576},
-#        'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
-#                   '-b:v 1600k -r 30 -acodec copy -b:a 112k -ac 2 -strict -2 -moov_size 30000 {format_filename}',
+        1.78: {'width': 1024,
+               'height': 576},
+        1.33: {'width': 768,
+               'height': 576},
+        #        'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
+        #                   '-b:v 1600k -r 30 -acodec copy -b:a 112k -ac 2 -strict -2 -moov_size 30000 {format_filename}',
         'command': '{ffmpeg} -y -i {filename} -s {format_width}x{format_height} -vcodec libx264 -vprofile baseline '
-                   '-b:v 1600k -r 30 -acodec copy -b:a 112k -ac 2 -strict -2 {format_filename}',
+        '-b:v 1600k -r 30 -acodec copy -b:a 112k -ac 2 -strict -2 {format_filename}',
         'fallback': 1,
     },
 }

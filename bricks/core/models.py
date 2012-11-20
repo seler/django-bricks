@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mptt.models import MPTTModel, TreeForeignKey
 
+from ..utils import inheritors
 from .managers import PublicationManager
 
 
@@ -65,17 +66,34 @@ class MPTTAbstract(MPTTModel):
         abstract = True
 
 
+class TiedObject(models.Model):
+    ties = generic.GenericRelation('Tie',
+                                   content_type_field='content_type',
+                                   object_id_field='object_pk')
+
+
+def content_type_choices_limit(model):
+    def _wrapped():
+        models = inheritors(model)
+        return [c.pk for m, c in ContentType.objects.get_for_models(*models).items()]
+    return {'id__in': _wrapped}
+
+
 class Tie(MPTTAbstract, PublicationAbstract, SiteAbstract):
     title = models.CharField(
+        max_length=256,
         verbose_name=_(u"title"))
     slug = models.SlugField(
         verbose_name=_(u"slug"))
     description = models.CharField(
         blank=True,
+        max_length=1024,
         null=True,
         verbose_name=_(u"description"))
 
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(
+        ContentType,
+        limit_choices_to=content_type_choices_limit(TiedObject))
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
 
@@ -85,10 +103,3 @@ class Tie(MPTTAbstract, PublicationAbstract, SiteAbstract):
 
     def __unicode__(self):
         return self.title
-
-
-class TiedObject(models.Model):
-    ties = generic.GenericRelation(
-        to=Tie,
-        content_type_field='content_type',
-        object_id_field='object_pk')

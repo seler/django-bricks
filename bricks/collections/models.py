@@ -1,14 +1,17 @@
+import datetime
+
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.sites.managers import CurrentSiteManager
 from django.utils.translation import ugettext_lazy as _
 
-from ..core.models import TiedObject,
+from ..core.models import TiedObject
 
 
-class Collection(models.Model):
+class Collection(TiedObject):
     name = models.CharField(
+        max_length=64,
         verbose_name=_(u"name"))
     slug = models.SlugField(
         verbose_name=_(u"slug"))
