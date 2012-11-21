@@ -1,13 +1,14 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
+from django.conf.urls import patterns as _patterns
 
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'bricks_video_test.views.home', name='home'),
-    # url(r'^bricks_video_test/', include('bricks_video_test.foo.urls')),
-
+patterns = (
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
+    # musi byc ostatnie jezeli puste
+    url(r'^', include('bricks.urls')),
 )
+
+urlpatterns = _patterns('', *patterns)

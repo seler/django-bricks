@@ -5,7 +5,7 @@ from .models import Collection
 
 
 class CollectionAdmin(admin.ModelAdmin):
-    inlines = [TieInlineAdmin(empty_permitted=False)]
+    inlines = [TieInlineAdmin]
 
 
 admin.site.register(Collection, CollectionAdmin)

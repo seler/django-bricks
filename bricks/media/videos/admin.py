@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from .models import Video, ConvertedVideo
 #from .forms import VideoForm
-from django.conf.urls import patterns
-from django.shortcuts import render_to_response
-from django.db import models
-from django import forms
-from django.utils.html import escape, conditional_escape
-from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
-from django.forms.util import flatatt
-from django.forms.widgets import CheckboxInput, FILE_INPUT_CONTRADICTION
+#from django.conf.urls import patterns
+#from django.shortcuts import render_to_response
+#from django.db import models
+#from django import forms
+#from django.utils.html import escape, conditional_escape
+#from django.utils.encoding import force_unicode
+#from django.utils.safestring import mark_safe
+#from django.forms.util import flatatt
+#from django.forms.widgets import CheckboxInput, FILE_INPUT_CONTRADICTION
 from django.core.files.storage import get_storage_class
-import datetime
+from bricks.core.admin import TieInlineAdmin
 
 
 safe_storage = get_storage_class(settings.DEFAULT_FILE_STORAGE)()
@@ -35,19 +34,19 @@ class UploadifyInput(forms.ClearableFileInput):
 
     def render(self, name, value, attrs=None):
         substitutions = {
-            'initial_text': self.initial_text,
-            'input_text': self.input_text,
-            'clear_template': '',
-            'clear_checkbox_label': self.clear_checkbox_label,
+        'initial_text': self.initial_text,
+        'input_text': self.input_text,
+        'clear_template': '',
+        'clear_checkbox_label': self.clear_checkbox_label,
         }
         template = u'%(input)s'
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
-        if value != '':
-            # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = force_unicode(self._format_value(value))
-        substitutions['input'] = mark_safe(u'<input%s />' % flatatt(final_attrs))
+            final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+            if value != '':
+                # Only add the 'value' attribute if a value is non-empty.
+                final_attrs['value'] = force_unicode(self._format_value(value))
+                substitutions['input'] = mark_safe(u'<input%s />' % flatatt(final_attrs))
 
         if value and hasattr(value, "url"):
             template = self.template_with_initial
@@ -68,21 +67,22 @@ class UploadifyInput(forms.ClearableFileInput):
         upload = None
         if filename:
             upload = safe_storage.open('video/original/%s' % filename)
-        if not self.is_required and CheckboxInput().value_from_datadict(
+            if not self.is_required and CheckboxInput().value_from_datadict(
             data, files, self.clear_checkbox_name(name)):
-            if upload:
-                # If the user contradicts themselves (uploads a new file AND
-                # checks the "clear" checkbox), we return a unique marker
-                # object that FileField will turn into a ValidationError.
-                return FILE_INPUT_CONTRADICTION
+                if upload:
+                    # If the user contradicts themselves (uploads a new file AND
+                    # checks the "clear" checkbox), we return a unique marker
+                    # object that FileField will turn into a ValidationError.
+                    return FILE_INPUT_CONTRADICTION
             # False signals to clear any existing value, as opposed to just None
             return False
         return upload
 """
 
+
 class VideoAdmin(admin.ModelAdmin):
     #form = VideoForm
-    inlines = (ConvertedVideoInlineAdmin,)
+    inlines = (TieInlineAdmin, ConvertedVideoInlineAdmin,)
     prepopulated_fields = {"slug": ("name",)}
     list_display = ('id', 'name')
     search_fields = ('name',)
@@ -90,7 +90,7 @@ class VideoAdmin(admin.ModelAdmin):
 
     """
     formfield_overrides = {
-        models.FileField: {'widget': UploadifyInput},
+    models.FileField: {'widget': UploadifyInput},
     }
     """
 
@@ -104,34 +104,32 @@ class VideoAdmin(admin.ModelAdmin):
             return super(VideoAdmin, self).save_model(request, obj, form,
                                                       change, *args, **kwargs)
 """
-    def save_related(self, request, form, formsets, change):
-        super(VideoAdmin, self).save_related(request, form, formsets, change)
-        if getattr(self, 'obj', None):
-            category = self.obj.get_category()
-            if category:
-                Video.objects.filter(pk=self.obj.pk).update(category_path=category.slug)
+def save_related(self, request, form, formsets, change):
+    super(VideoAdmin, self).save_related(request, form, formsets, change)
+    if getattr(self, 'obj', None):
+        category = self.obj.get_category()
+        if category:
+            Video.objects.filter(pk=self.obj.pk).update(category_path=category.slug)
+            def get_urls(self):
+                urls = super(VideoAdmin, self).get_urls()
+                video_urls = patterns('',
+                (r'^upload_complete/$', self.upload_complete)
+                )
+                return video_urls + urls
 """
 """
-    def get_urls(self):
-        urls = super(VideoAdmin, self).get_urls()
-        video_urls = patterns('',
-            (r'^upload_complete/$', self.upload_complete)
-        )
-        return video_urls + urls
+def upload_complete(self, request):
+    return render_to_response('admin/videos/video/upload_complete.html')
 """
 """
-    def upload_complete(self, request):
-        return render_to_response('admin/videos/video/upload_complete.html')
-"""
-"""
-    def set_ready(self, request, queryset):
-        cnt = 0
-        for video in queryset:
-            video.ready = True
-            video.save()
-            cnt += 1
+def set_ready(self, request, queryset):
+    cnt = 0
+    for video in queryset:
+        video.ready = True
+        video.save()
+        cnt += 1
         self.message_user(request, u'%s pomyślnie oznaczonych jako skonwertowane.' % cnt)
-    set_ready.short_description = u'Oznacz jako skonwertowane'
+        set_ready.short_description = u'Oznacz jako skonwertowane'
 
     def force_convert(self, request, queryset):
         for video in queryset:
@@ -139,11 +137,11 @@ class VideoAdmin(admin.ModelAdmin):
             video.save()
             video.converted_videos.all().delete()
             video.process_video()
-        self.message_user(request, u'Ponowne konwertowanie wybranych filmów.')
-    force_convert.short_description = u'Ponowna konwersja filmu'
-    def get_duration(self, obj):
-        if obj.duration:
-            return str(datetime.timedelta(seconds=obj.duration))
+            self.message_user(request, u'Ponowne konwertowanie wybranych filmów.')
+            force_convert.short_description = u'Ponowna konwersja filmu'
+            def get_duration(self, obj):
+                if obj.duration:
+                    return str(datetime.timedelta(seconds=obj.duration))
         return 'Nieznany'
     get_duration.short_description = 'Czas trwania'
 

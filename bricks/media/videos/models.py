@@ -8,6 +8,7 @@ from django.core.files.storage import get_storage_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from bricks.core.models import TiedObject
 #from .managers import VideosManager
 from .tasks import process_video
 
@@ -31,7 +32,7 @@ def firstof(*items):
             return i
 
 
-class Video(models.Model):
+class Video(TiedObject):
     file = models.FileField(
         blank=True, null=True, storage=safe_storage,
         upload_to='bricks/videos/original',
@@ -52,45 +53,46 @@ class Video(models.Model):
     slug = models.SlugField(verbose_name=_('slug'))
 
     name = models.CharField(
-                    max_length=64,
-                    verbose_name=_(u'nazwa'))
+        max_length=64,
+        verbose_name=_(u'nazwa'))
 
     user = models.ForeignKey('auth.User',
-                    verbose_name=_(u'użytkownik dostawca'),
-                    related_name='videos')
+                             verbose_name=_(u'użytkownik dostawca'),
+                             related_name='videos')
 
     width = models.IntegerField(
-                    blank=True,
-                    editable=False,
-                    null=True,
-                    verbose_name=_(u'szerokość'))
+        blank=True,
+        editable=False,
+        null=True,
+        verbose_name=_(u'szerokość'))
 
     height = models.IntegerField(
-                    blank=True,
-                    editable=False,
-                    null=True,
-                    verbose_name=_(u'wysokość'))
+        blank=True,
+        editable=False,
+        null=True,
+        verbose_name=_(u'wysokość'))
 
     aspect_ratio = models.FloatField(
-                    blank=True,
-                    choices=getattr(settings, 'ASPECT_RATIO_CHOICES', ASPECT_RATIO_CHOICES),
-                    null=True,
-                    verbose_name=_(u'proporcje'))
+        blank=True,
+        choices=getattr(
+            settings, 'ASPECT_RATIO_CHOICES', ASPECT_RATIO_CHOICES),
+        null=True,
+        verbose_name=_(u'proporcje'))
 
     duration = models.PositiveIntegerField(
-                    blank=True,
-                    null=True,
-                    verbose_name=_(u"czas trwania"))
+        blank=True,
+        null=True,
+        verbose_name=_(u"czas trwania"))
 
     ready = models.BooleanField(
-                    default=False,
-                    editable=False,
-                    verbose_name=_(u'skonwertowany'))
+        default=False,
+        editable=False,
+        verbose_name=_(u'skonwertowany'))
 
     #TODO
     #objects = VideosManager()
 
-    class Meta:
+    class Meta(TiedObject.Meta):
         db_table = 'bricks_media_video'
         verbose_name = _(u'film')
         verbose_name_plural = _(u'filmy')
@@ -103,7 +105,8 @@ class Video(models.Model):
         Calculates aspect ratio and returns closest value from
         ``ASPECT_RATIO_CHOICES``.
         """
-        ratios = map(lambda l: l[0], getattr(settings, 'ASPECT_RATIO_CHOICES', ASPECT_RATIO_CHOICES))
+        ratios = map(lambda l: l[0], getattr(
+            settings, 'ASPECT_RATIO_CHOICES', ASPECT_RATIO_CHOICES))
         original_ratio = float(self.width) / float(self.height)
         aspect_ratio = min(ratios, key=lambda x: abs(x - original_ratio))
         return aspect_ratio
@@ -127,23 +130,18 @@ class Video(models.Model):
         assert self.file is not None, 'Video has not file attached!'
         return process_video(self.id)
 
-    def get_absolute_url(self):
-        pass
-        #TODO
-        #return reverse('show_video', args=[self.category_path or 'wszystko', self.slug, self.pk])
-
     def get_converted_video(self, format=None):
         u"""
         Returns ConvertedVideo in default format.
         """
         if format is None:
             format = settings.DEFAULT_VIDEO_FORMAT
-        try:
-            return self.converted_videos.filter(format=format).get()
-        except ConvertedVideo.DoesNotExist:
-            vs = self.converted_videos.all()[:1]
-            if len(vs) > 0:
-                return vs[0]
+            try:
+                return self.converted_videos.filter(format=format).get()
+            except ConvertedVideo.DoesNotExist:
+                vs = self.converted_videos.all()[:1]
+                if len(vs) > 0:
+                    return vs[0]
             return None
 
     def get_player_width(self):
@@ -157,8 +155,8 @@ class Video(models.Model):
     def delete(self, *args, **kwargs):
         if self.file:
             self.file.delete(save=True)
-        self.converted_videos.all().delete()
-        super(Video, self).delete(*args, **kwargs)
+            self.converted_videos.all().delete()
+            super(Video, self).delete(*args, **kwargs)
 
     def length(self):
         return str(datetime.timedelta(self.duration))
@@ -173,21 +171,21 @@ class ConvertedVideo(models.Model):
                                settings.BRICKS_VIDEO_FORMATS.items()))
 
     video = models.ForeignKey('Video',
-                    related_name='converted_videos',
-                    verbose_name=_(u'film'))
+                              related_name='converted_videos',
+                              verbose_name=_(u'film'))
 
     format = models.PositiveSmallIntegerField(
-                    choices=FORMAT_CHOICES,
-                    editable=False,
-                    verbose_name=_(u'format'))
+        choices=FORMAT_CHOICES,
+        editable=False,
+        verbose_name=_(u'format'))
 
     file = models.FileField(
-                    blank=True,
-                    #editable=False,
-                    null=True,
-                    storage=safe_storage,
-                    upload_to=converted_video_file_name,
-                    verbose_name=_(u'plik'))
+        blank=True,
+        #editable=False,
+        null=True,
+        storage=safe_storage,
+        upload_to=converted_video_file_name,
+        verbose_name=_(u'plik'))
 
     class Meta:
         db_table = 'bricks_media_convertedvideo'
@@ -197,9 +195,6 @@ class ConvertedVideo(models.Model):
 
     def __unicode__(self):
         return "{0} [{1}]".format(self.video.title, self.get_format_display())
-
-    def get_absolute_url(self):
-        return self.file.url
 
     def get_format(self):
         u"""
@@ -226,4 +221,4 @@ class ConvertedVideo(models.Model):
     def delete(self, *args, **kwargs):
         if self.file:
             self.file.delete(save=True)
-        super(ConvertedVideo, self).delete(*args, **kwargs)
+            super(ConvertedVideo, self).delete(*args, **kwargs)
