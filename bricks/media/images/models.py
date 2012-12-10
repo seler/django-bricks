@@ -1,15 +1,20 @@
+import os
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from bricks.core.models import TiedObject
 
+from .fields import CropImageField
+
 
 class Image(TiedObject):
-    image = models.ImageField(
-        height_field='height',
-        max_length=256,
+    image = CropImageField(
         upload_to='image/original',
+        max_length=256,
+        height_field='height',
         width_field='width',
+        size_field='size',
         verbose_name=_("image file"))
     width = models.IntegerField(
         blank=True,
@@ -36,7 +41,10 @@ class Image(TiedObject):
         verbose_name_plural = _(u'images')
 
     def __unicode__(self):
-        return self.image.name
+        return self.basename()
+
+    def basename(self):
+        return os.path.basename(self.image.name)
 
 
 def fake_upload_to(*args, **kwargs):
@@ -48,20 +56,20 @@ class ResizedImage(models.Model):
     MODE_SCALE = 'scale'
     MODE_STRETCH = 'stretch'
     MODE_CHOICES = (
-        (MODE_ZOOM, _("zoom")),
-        (MODE_SCALE, _("scale")),
-        (MODE_STRETCH, _("stretch")),
+        (MODE_ZOOM, _("Zoom")),
+        (MODE_SCALE, _("Scale")),
+        (MODE_STRETCH, _("Stretch")),
     )
     original_name = models.ImageField(
         upload_to=fake_upload_to,
         max_length=255,
         editable=False,
-        verbose_name=_(u"original_name"))
+        verbose_name=_(u"original"))
     resized_name = models.ImageField(
         upload_to='images/resized_image',
         max_length=255,
         editable=False,
-        verbose_name=_(u"original_name"))
+        verbose_name=_(u"resized"))
     mode = models.CharField(
         choices=MODE_CHOICES,
         editable=False,
@@ -101,6 +109,8 @@ class ResizedImage(models.Model):
                 self.crop_y1 is not None and
                 self.crop_x2 is not None and
                 self.crop_y2 is not None)
+    cropped.boolean = True
+    cropped.short_description = _(u"cropped")
 
     def default_crop(self):
         original_width = self.original_name.width
@@ -117,3 +127,9 @@ class ResizedImage(models.Model):
         height_offset = (original_height - crop_height) / 2.
 
         return {"x1": int(width_offset), "y1": int(height_offset), "x2": int(crop_width + width_offset), "y2": int(crop_height + height_offset)}
+
+    def delete(self, *args, **kwargs):
+        file = self.resized_name.file
+        if file:
+            self.resized_name.storage.delete(file)
+        return super(ResizedImage, self).delete(*args, **kwargs)

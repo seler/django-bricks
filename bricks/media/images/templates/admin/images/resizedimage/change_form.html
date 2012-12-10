@@ -14,8 +14,8 @@
         var scaleY = {{ original.height }} / selection.height;
 
         $('#preview img').css({
-width: Math.round(scaleX * {{ original.original_name.width }}),
-height: Math.round(scaleY * {{ original.original_name.height }}),
+            width: Math.round(scaleX * {{ original.original_name.width }}),
+            height: Math.round(scaleY * {{ original.original_name.height }}),
             marginLeft: -Math.round(scaleX * selection.x1),
             marginTop: -Math.round(scaleY * selection.y1)
         });
@@ -35,25 +35,34 @@ height: Math.round(scaleY * {{ original.original_name.height }}),
                 $('#id_crop_x1, #id_crop_y1, #id_crop_x2, #id_crop_y2').removeAttr('disabled');
             });
             $('#photo').imgAreaSelect({
-{% if original.cropped %}
-x1: {{ original.crop_x1 }},
-y1: {{ original.crop_y1 }},
-x2: {{ original.crop_x2 }},
-y2: {{ original.crop_y2 }},
-{% else %}
-x1: {{ original.default_crop.x1 }},
-y1: {{ original.default_crop.y1 }},
-x2: {{ original.default_crop.x2 }},
-y2: {{ original.default_crop.y2 }},
-{% endif %}
-aspectRatio: '{{ original.width }}:{{ original.height }}',
-handles: true,
-fadeSpeed: 200,
-persistent: true,
-imageWidth: {{ original.original_name.width }},
-imageHeight: {{ original.original_name.height }},
-onInit: preview,
-onSelectChange: _preview });
+                {% if not original.mode == 'scale' %}
+                {% if not original.mode == 'stretch' or original.cropped %}
+                {% if original.cropped %}
+                x1: {{ original.crop_x1 }},
+                y1: {{ original.crop_y1 }},
+                x2: {{ original.crop_x2 }},
+                y2: {{ original.crop_y2 }},
+                {% else %}
+                x1: {{ original.default_crop.x1 }},
+                y1: {{ original.default_crop.y1 }},
+                x2: {{ original.default_crop.x2 }},
+                y2: {{ original.default_crop.y2 }},
+                {% endif %}
+                aspectRatio: '{{ original.width }}:{{ original.height }}',
+                {% else %}
+                x1: 0,
+                y1: 0,
+                x2: {{ original.original_name.width }},
+                y2: {{ original.original_name.height }},
+                {% endif %}
+                {% endif %}
+                handles: true,
+                fadeSpeed: 200,
+                persistent: true,
+                imageWidth: {{ original.original_name.width }},
+                imageHeight: {{ original.original_name.height }},
+                onInit: preview,
+                onSelectChange: _preview });
         });
 </script>
 
@@ -75,7 +84,11 @@ onSelectChange: _preview });
 
         <div class="frame" style="margin: 0 1em; width: {{ original.width }}px; height: {{ original.height }}px;">
             <div id="preview" style="width: {{ original.width }}px; height: {{ original.height }}px; overflow: hidden;">
+            {% if original.mode == 'scale' %}
+                <img src="{{ original.original_name.url }}" style="max-width: {{ original.width }}px; max-height: {{ original.height }}px;" />
+            {% else %}
                 <img src="{{ original.original_name.url }}" style="width: {{ original.width }}px;" />
+            {% endif %}
             </div>
         </div>
         <div style="margin: 1em 1em;">
