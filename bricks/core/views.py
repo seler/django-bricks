@@ -28,18 +28,15 @@ class TieDetailView(DetailView):
         if queryset is None:
             queryset = self.get_queryset()
 
-        root = self.kwargs.get('root', False)
         path = self.kwargs.get('path', None)
-        if root:
-            queryset = queryset.filter(level=0)
-        elif path:
+        if path:
             path_elements = [p for p in path.split('/')]
             tie = None
             f = {}
             for (i, slug) in enumerate(path_elements):
                 l = '__'.join(['parent'] * (len(path_elements) - 1 - i))
                 a = lambda a: '__'.join([l, a]) if l else a
-                f.update({a('slug'): slug, a('level'): i + 1})
+                f.update({a('slug'): slug, a('level'): i})
             queryset = queryset.filter(**f)
         else:
             raise ImproperlyConfigured

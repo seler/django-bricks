@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ..core.admin import TieInlineAdmin
+from bricks.core.admin import TieInlineAdmin
 from .models import Collection
 
 

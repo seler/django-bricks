@@ -1,6 +1,6 @@
 import datetime
 
-from django.db import models, IntegrityError
+from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.sites.managers import CurrentSiteManager
@@ -13,7 +13,7 @@ from .managers import PublicationManager
 
 import django.db.models.options as options
 
-options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('template_name_field',)
+options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('template_name_field', 'template_name_suffix')
 
 
 class PublicationAbstract(models.Model):
@@ -56,9 +56,16 @@ class SiteAbstract(models.Model):
     class Meta:
         abstract = True
 
+TEMPLATE_NAME_FIELD = None
+TEMPLATE_NAME_SUFFIX = '_detail'
+
 
 class TiedObject(models.Model):
     ties = generic.GenericRelation('Tie')
+
+    class Meta:
+        abstract = True
+        template_name_field = TEMPLATE_NAME_FIELD
 
     def get_tie(self):
         try:
@@ -81,14 +88,17 @@ class TiedObject(models.Model):
 
     def get_template_names(self, path):
         names = []
-        if self._meta.template_name_field:
-            name = getattr(self.object, self.template_name_field, None)
+        template_name_suffix = getattr(self._meta, 'template_name_suffix', TEMPLATE_NAME_SUFFIX)
+        template_name_field = getattr(self._meta, 'template_name_field', TEMPLATE_NAME_FIELD)
+        if template_name_field:
+            name = getattr(self.object, template_name_field, None)
             if name:
                 names.append(name)
         else:
-            tail = "%s_%s_detail.html" % (
+            tail = "%s_%s%s.html" % (
                 self._meta.app_label,
                 self._meta.object_name.lower(),
+                template_name_suffix,
             )
             path_elements = path.split('/')
             for i, slug in enumerate(path_elements):
@@ -97,14 +107,11 @@ class TiedObject(models.Model):
             names.append("bricks/ties/%s" % (tail,))
             for i, slug in enumerate(path_elements):
                 p = '/'.join(path_elements[:len(path_elements) - i])
-                names.append("bricks/ties/%s/tie_detail.html" % (p,))
+                names.append("bricks/ties/%s/tie%s.html" % (p, template_name_suffix))
             names.append("bricks/ties/tie_detail.html")
 
         return names
-
-    class Meta:
-        abstract = True
-        template_name_field = None
+        template_name_suffix = TEMPLATE_NAME_SUFFIX
 
 
 def tie_content_type_choices_limit():
@@ -137,6 +144,7 @@ class Tie(MPTTModel, PublicationAbstract, SiteAbstract):
 
     parent = TreeForeignKey(
         to='self',
+        blank=True,
         null=True,
         related_name='children',
         verbose_name=_('parent'))
@@ -159,13 +167,8 @@ class Tie(MPTTModel, PublicationAbstract, SiteAbstract):
     def __unicode__(self):
         return self.title
 
-    def save(self, *args, **kwargs):
-        if not self.parent and self.__class__.objects.filter(level=0).exists() and self.__class__.objects.filter(level=0).get().pk != self.pk:
-            raise IntegrityError(u"Only one root node allowed!")
-        return super(Tie, self).save(*args, **kwargs)
-
     def get_absolute_url(self):
         path = '/'
-        for p in self.get_ancestors(include_self=True, ascending=False)[1:]:
+        for p in self.get_ancestors(include_self=True, ascending=False):
             path += p.slug + '/'
         return path
