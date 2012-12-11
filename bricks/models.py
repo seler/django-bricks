@@ -8,8 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from mptt.models import MPTTModel, TreeForeignKey
 
-from ..utils import inheritors
-from .managers import PublicationManager
+from bricks.utils import inheritors
+from bricks.managers import PublicationManager
 
 import django.db.models.options as options
 

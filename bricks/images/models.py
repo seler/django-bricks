@@ -3,7 +3,7 @@ import os
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from bricks.core.models import TiedObject
+from bricks.models import TiedObject
 
 from .fields import CropImageField
 

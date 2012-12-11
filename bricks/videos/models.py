@@ -8,7 +8,7 @@ from django.core.files.storage import get_storage_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from bricks.core.models import TiedObject
+from bricks.models import TiedObject
 #from .managers import VideosManager
 from .tasks import process_video
 

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
 
-from bricks.core.admin import TieInlineAdmin
+from bricks.admin import TieInlineAdmin
 
 from .models import Image, ResizedImage
 from .image import crop_image, get_image

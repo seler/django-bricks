@@ -2,7 +2,7 @@ from django.views.generic import DetailView
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
-from bricks.core.models import Tie
+from bricks.models import Tie
 
 
 class TieDetailView(DetailView):

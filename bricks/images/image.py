@@ -12,7 +12,7 @@ from django.core.files.base import ContentFile
 register = template.Library()
 
 from django.contrib.staticfiles import finders
-from bricks.media.images.models import ResizedImage
+from bricks.images.models import ResizedImage
 
 
 def generate_image_path(mode, width, height, path):

@@ -15,7 +15,7 @@ from .models import Video, ConvertedVideo
 #from django.forms.util import flatatt
 #from django.forms.widgets import CheckboxInput, FILE_INPUT_CONTRADICTION
 from django.core.files.storage import get_storage_class
-from bricks.core.admin import TieInlineAdmin
+from bricks.admin import TieInlineAdmin
 
 
 safe_storage = get_storage_class(settings.DEFAULT_FILE_STORAGE)()
