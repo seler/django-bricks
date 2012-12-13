@@ -8,43 +8,16 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Page'
-        db.create_table(u'bricks_page', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('is_active', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('add_date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('mod_date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('pub_date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
-            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=256)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50)),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=1024, null=True, blank=True)),
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'], null=True, blank=True)),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True)),
+        # Adding model 'TestTestTest'
+        db.create_table(u'bricks_testtesttest', (
+            (u'brick_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['bricks.Brick'], unique=True, primary_key=True)),
         ))
-        db.send_create_signal(u'bricks', ['Page'])
-
-        # Adding model 'Brick'
-        db.create_table(u'bricks_brick', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('is_active', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('add_date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('mod_date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-            ('pub_date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
-            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=256)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50)),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=1024, null=True, blank=True)),
-        ))
-        db.send_create_signal(u'bricks', ['Brick'])
+        db.send_create_signal(u'bricks', ['TestTestTest'])
 
 
     def backwards(self, orm):
-        # Deleting model 'Page'
-        db.delete_table(u'bricks_page')
-
-        # Deleting model 'Brick'
-        db.delete_table(u'bricks_brick')
+        # Deleting model 'TestTestTest'
+        db.delete_table(u'bricks_testtesttest')
 
 
     models = {
@@ -73,6 +46,10 @@ class Migration(SchemaMigration):
             'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '256'})
+        },
+        u'bricks.testtesttest': {
+            'Meta': {'ordering': "('-pub_date',)", 'object_name': 'TestTestTest', '_ormbases': [u'bricks.Brick']},
+            u'brick_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['bricks.Brick']", 'unique': 'True', 'primary_key': 'True'})
         },
         u'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},

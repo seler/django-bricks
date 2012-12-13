@@ -8,7 +8,7 @@ from django.core.files.storage import get_storage_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from bricks.models import TiedObject
+from bricks.models import Brick
 #from .managers import VideosManager
 from .tasks import process_video
 
@@ -32,7 +32,7 @@ def firstof(*items):
             return i
 
 
-class Video(TiedObject):
+class Video(Brick):
     file = models.FileField(
         blank=True, null=True, storage=safe_storage,
         upload_to='bricks/videos/original',
@@ -49,16 +49,6 @@ class Video(TiedObject):
         default=3.,
         help_text=_(u'sekunda, z której zostanie zrobiony kadr'),
         verbose_name=_(u'czas kadru'))
-
-    slug = models.SlugField(verbose_name=_('slug'))
-
-    name = models.CharField(
-        max_length=64,
-        verbose_name=_(u'nazwa'))
-
-    user = models.ForeignKey('auth.User',
-                             verbose_name=_(u'użytkownik dostawca'),
-                             related_name='videos')
 
     width = models.IntegerField(
         blank=True,
@@ -92,7 +82,7 @@ class Video(TiedObject):
     #TODO
     #objects = VideosManager()
 
-    class Meta(TiedObject.Meta):
+    class Meta(Brick.Meta):
         db_table = 'bricks_media_video'
         verbose_name = _(u'film')
         verbose_name_plural = _(u'filmy')

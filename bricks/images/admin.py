@@ -2,20 +2,20 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
 
-from bricks.admin import TieInlineAdmin
+from bricks.admin import PageInlineAdmin
 
 from .models import Image, ResizedImage
 from .image import crop_image, get_image
 
 
 class ImageAdmin(admin.ModelAdmin):
-    inlines = [TieInlineAdmin]
+    inlines = [PageInlineAdmin]
     list_display = ['thumbnail', 'basename']
 
     def thumbnail(self, obj):
         if obj.image:
             html = """<div style="width: 320px; text-align: center;"><img src="{0}" /></div>"""
-            return html.format(get_image(obj.image, ResizedImage.MODE_SCALE, 320, 180))
+            return html.format(get_image(obj.image, ResizedImage.MODE_ZOOM, 320, 180))
         else:
             return "no-image"
     thumbnail.allow_tags = True

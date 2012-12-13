@@ -2,22 +2,22 @@ from django.views.generic import DetailView
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
-from bricks.models import Tie
+from bricks.models import Page
 
 
-class TieDetailView(DetailView):
-    context_object_name = 'tie'
+class PageDetailView(DetailView):
+    context_object_name = 'page'
     context_tied_object_name = 'object'
-    model = Tie
+    model = Page
     #FIXME: published!
-    queryset = Tie.objects.all()
+    queryset = Page.objects.all()
     slug_field = 'slug'
     context_object_name = None
     slug_url_kwarg = 'slug'
     pk_url_kwarg = 'pk'
 
     def get_context_data(self, **kwargs):
-        context = super(TieDetailView, self).get_context_data(**kwargs)
+        context = super(PageDetailView, self).get_context_data(**kwargs)
         context[self.context_tied_object_name] = self.object.content_object
         return context
 
@@ -50,7 +50,7 @@ class TieDetailView(DetailView):
 
     def get_queryset(self):
         #TODO
-        return super(TieDetailView, self).get_queryset()
+        return super(PageDetailView, self).get_queryset()
 
 
-tie_detail = TieDetailView.as_view()
+tie_detail = PageDetailView.as_view()

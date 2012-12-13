@@ -15,7 +15,7 @@ from .models import Video, ConvertedVideo
 #from django.forms.util import flatatt
 #from django.forms.widgets import CheckboxInput, FILE_INPUT_CONTRADICTION
 from django.core.files.storage import get_storage_class
-from bricks.admin import TieInlineAdmin
+from bricks.admin import PageInlineAdmin
 
 
 safe_storage = get_storage_class(settings.DEFAULT_FILE_STORAGE)()
@@ -82,10 +82,10 @@ class UploadifyInput(forms.ClearableFileInput):
 
 class VideoAdmin(admin.ModelAdmin):
     #form = VideoForm
-    inlines = (TieInlineAdmin, ConvertedVideoInlineAdmin,)
-    prepopulated_fields = {"slug": ("name",)}
-    list_display = ('id', 'name')
-    search_fields = ('name',)
+    inlines = (PageInlineAdmin, ConvertedVideoInlineAdmin,)
+    prepopulated_fields = {"slug": ("title",)}
+    list_display = ('id', 'title')
+    search_fields = ('title',)
     #actions = ['force_convert']
 
     """

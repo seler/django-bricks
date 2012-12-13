@@ -1,36 +1,69 @@
 from django.contrib import admin
 from django.contrib.contenttypes.generic import GenericStackedInline, BaseGenericInlineFormSet
+from django.utils.translation import ugettext_lazy as _
+from django.utils.datastructures import SortedDict
 
-from .models import Tie
+from .models import Page
 
 
-class TieAdmin(admin.ModelAdmin):
+class ModelAdmin(admin.ModelAdmin):
 
     def get_actions(self, request):
-        actions = super(TieAdmin, self).get_actions(request)
+        u"""
+        Zwraca podmieniona funkcje akcji, ktora przy wykonaniu loguje
+        do standardowej historii Django jej wykonanie.
+
+        `Wyjasnienie jak to dziala <http://youtu.be/x0yQg8kHVcI>`_.
+        """
+
+        def wrap(old_func, name, desc):
+            def func(admin_instance, request, queryset):
+                ret = old_func(admin_instance, request, queryset)
+                change_message = _(u"Changelist action: {description}.")
+                change_message = change_message.format(description=desc)
+                log_this = lambda obj: self.log_change(
+                    request, obj, change_message)
+                map(log_this, queryset)
+                return ret
+            return func, name, desc
+
+        old_actions = super(ModelAdmin, self).get_actions(request)
+
+        actions = SortedDict(
+            [(key, wrap(*value)) for key, value in old_actions.items()]
+        )
+
+        return actions
+
+
+class PageAdmin(ModelAdmin):
+
+    def get_actions(self, request):
+        actions = super(PageAdmin, self).get_actions(request)
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
 
-    def has_delete_permission(self, request, obj=None):
-        if obj and not obj.level:
-            return False
-        return super(TieAdmin, self).has_add_permission(request)
 
+class RequiredGenericInlineFormSet(BaseGenericInlineFormSet):
+    required = True
 
-class RequiredInlineFormSet(BaseGenericInlineFormSet):
     def _construct_form(self, i, **kwargs):
-        form = super(RequiredInlineFormSet, self)._construct_form(i, **kwargs)
-        form.empty_permitted = False
+        form = super(RequiredGenericInlineFormSet, self)._construct_form(i, **kwargs)
+        form.empty_permitted = not self.required
         return form
 
 
-class TieInlineAdmin(GenericStackedInline):
-    model = Tie
-    extra = 1
+class PageInlineAdmin(GenericStackedInline):
+    model = Page
     max_num = 1
-    formset = RequiredInlineFormSet
+    extra = 0
     template = "admin/edit_inline/tie_stacked.html"
 
 
-admin.site.register(Tie, TieAdmin)
+class RequiredPageInlineAdmin(PageInlineAdmin):
+    formset = RequiredGenericInlineFormSet
+    extra = 1
+
+
+admin.site.register(Page, PageAdmin)

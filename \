@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 
 
 from bricks.utils import inheritors
@@ -95,10 +94,17 @@ class Brick(PublicationAbstract):
     class Meta(PublicationAbstract.Meta):
         verbose_name = _(u"tie")
         verbose_name_plural = _(u"ties")
+        unique_together = (('content_type', 'object_id'), ('slug', 'level'))
         template_name_field = TEMPLATE_NAME_FIELD
 
     def __unicode__(self):
         return self.title
+"""
+    def get_absolute_url(self):
+        path = '/'
+        for p in self.get_ancestors(include_self=True, ascending=False):
+            path += p.slug + '/'
+        return path
 
     def get_template_names(self, path):
         names = []
@@ -109,32 +115,37 @@ class Brick(PublicationAbstract):
             if name:
                 names.append(name)
         else:
-            template_name = "%s/%s%s.html" % (
+            tail = "%s_%s%s.html" % (
                 self._meta.app_label,
                 self._meta.object_name.lower(),
                 template_name_suffix,
             )
-            names.append(template_name)
-            names.append("bricks/brick/brick_detail.html")
+            path_elements = path.split('/')
+            for i, slug in enumerate(path_elements):
+                p = '/'.join(path_elements[:len(path_elements) - i])
+                names.append("bricks/ties/%s/%s" % (p, tail,))
+            names.append("bricks/ties/%s" % (tail,))
+            for i, slug in enumerate(path_elements):
+                p = '/'.join(path_elements[:len(path_elements) - i])
+                names.append("bricks/ties/%s/tie%s.html" % (p, template_name_suffix))
+            names.append("bricks/ties/tie_detail.html")
 
         return names
         template_name_suffix = TEMPLATE_NAME_SUFFIX
+"""
 """
 def tie_content_type_choices_limit():
     def _wrapped():
         models = inheritors(TiedObject)
         return [c.pk for m, c in ContentType.objects.get_for_models(*models).items()]
     return {'id__in': _wrapped}
-"""
 
-def get_brick(instance):
-    if not hasattr(instance, '_brick'):
-        models = inheritors(instance.__class__)
-        for model in models:
-            try:
-                instance._brick = getattr(instance, model.__name__.lower())
-            except ObjectDoesNotExist:
-                continue
-            else:
-                break
-    return instance._brick
+
+def tie_default_parent():
+    def _wrapped():
+        try:
+            return Tie.objects.get(level=0)
+        except Tie.DoesNotExist:
+            return None
+    return _wrapped
+"""

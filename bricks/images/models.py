@@ -3,14 +3,14 @@ import os
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from bricks.models import TiedObject
+from bricks.models import Brick
 
 from .fields import CropImageField
 
 
-class Image(TiedObject):
+class Image(Brick):
     image = CropImageField(
-        upload_to='image/original',
+        upload_to='images/original',
         max_length=256,
         height_field='height',
         width_field='width',

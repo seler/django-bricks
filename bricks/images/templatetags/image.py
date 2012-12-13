@@ -3,8 +3,8 @@ import re
 
 from django import template
 
-from bricks.media.images.image import get_image
-from bricks.media.images.models import ResizedImage
+from bricks.images.image import get_image
+from bricks.images.models import ResizedImage
 
 register = template.Library()
 

@@ -90,3 +90,20 @@ def delete_resized(original_name):
 
 def delete_original(file):
     file.storage.delete(file)
+
+
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    rules = [
+        (
+            (CropImageField,),
+            [],
+            {
+                "size_field": ["size_field", {"default": "'size'"}],
+            },
+        )
+    ]
+    add_introspection_rules(rules, ["^bricks\.images\.fields\.CropImageField"])
