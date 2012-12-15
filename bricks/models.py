@@ -6,6 +6,7 @@ from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
+from mptt.models import MPTTModel, TreeForeignKey
 
 from bricks.utils import inheritors
 from bricks.managers import PublicationManager
@@ -17,7 +18,7 @@ options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('template_name_field', 'templat
 
 class PublicationAbstract(models.Model):
     is_active = models.BooleanField(
-        default=False,
+        default=True,
         verbose_name=_('is active'))
     add_date = models.DateTimeField(
         auto_now_add=True,
@@ -48,7 +49,8 @@ class PublicationAbstract(models.Model):
         get_latest_by = 'pub_date'
 
 
-class Page(PublicationAbstract):
+class Page(MPTTModel, PublicationAbstract):
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     title = models.CharField(
         max_length=256,
         verbose_name=_(u"title"))
@@ -73,6 +75,12 @@ class Page(PublicationAbstract):
         null=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
 
+    class MPTTMeta:
+        order_insertion_by = ['title']
+
+    def get_absolute_url(self):
+
+
 
 TEMPLATE_NAME_FIELD = None
 TEMPLATE_NAME_SUFFIX = '_detail'
@@ -91,6 +99,12 @@ class Brick(PublicationAbstract):
         max_length=1024,
         null=True,
         verbose_name=_(u"description"))
+
+    picture = models.ForeignKey(
+        to='images.Image',
+        blank=True,
+        null=True,
+        verbose_name=_(u"picture"))
 
     class Meta(PublicationAbstract.Meta):
         verbose_name = _(u"tie")
@@ -119,6 +133,21 @@ class Brick(PublicationAbstract):
 
         return names
         template_name_suffix = TEMPLATE_NAME_SUFFIX
+
+    def get_absolute_url(self):
+        classes = [self.__class__] + list(inheritors(self.__class__))
+        content_types = ContentType.objects.get_for_models(*classes)
+        for ct in content_types:
+            try:
+                page = Page.objects.get(content_type=ct, object_id=self.id)
+            except Page.DoesNotExist:
+                continue
+            else:
+                return page.get_absolute_url()
+        else:
+            return ""
+
+
 """
 def tie_content_type_choices_limit():
     def _wrapped():
@@ -126,6 +155,7 @@ def tie_content_type_choices_limit():
         return [c.pk for m, c in ContentType.objects.get_for_models(*models).items()]
     return {'id__in': _wrapped}
 """
+
 
 def get_brick(instance):
     if not hasattr(instance, '_brick'):

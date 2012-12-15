@@ -8,10 +8,13 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from StringIO import StringIO
 from django.core.files.base import ContentFile
+from django.db.models.fields.files import FileField
+
 
 register = template.Library()
 
 from django.contrib.staticfiles import finders
+from bricks.images.models import Image as BricksImage
 from bricks.images.models import ResizedImage
 
 
@@ -117,6 +120,15 @@ def create_image(image, mode, width, height):
 
 
 def get_image(image, mode, width, height):
+    if isinstance(image, BricksImage):
+        image = image.image
+    """
+    if not isinstance(image, FileField):
+        pass
+        #raise Exception("image object must be instance of FieldFile class")
+    """
+    if not image:
+        raise Exception("no image")
     resized_image, created = ResizedImage.objects.get_or_create(
         original_name=image.name, mode=mode, width=width, height=height)
 

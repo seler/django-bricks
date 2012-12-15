@@ -3,14 +3,20 @@ from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
 
 from bricks.admin import PageInlineAdmin
+from bricks.collections.admin import CollectionObjectInlineAdmin, CollectionAdmin
 
-from .models import Image, ResizedImage
+from .models import Gallery, Image, ResizedImage
 from .image import crop_image, get_image
 
 
+class GalleryAdmin(CollectionAdmin):
+    prepopulated_fields = {"slug": ("title",)}
+
+
 class ImageAdmin(admin.ModelAdmin):
-    inlines = [PageInlineAdmin]
+    inlines = [PageInlineAdmin, CollectionObjectInlineAdmin]
     list_display = ['thumbnail', 'basename']
+    prepopulated_fields = {"slug": ("title",)}
 
     def thumbnail(self, obj):
         if obj.image:
@@ -65,5 +71,6 @@ class ResizedImageAdmin(admin.ModelAdmin):
         obj.save()
 
 
+admin.site.register(Gallery, GalleryAdmin)
 admin.site.register(Image, ImageAdmin)
 admin.site.register(ResizedImage, ResizedImageAdmin)

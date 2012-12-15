@@ -7,7 +7,7 @@ from bricks.models import Page
 
 class PageDetailView(DetailView):
     context_object_name = 'page'
-    context_tied_object_name = 'object'
+    context_content_object_name = 'object'
     model = Page
     #FIXME: published!
     queryset = Page.objects.all()
@@ -18,7 +18,7 @@ class PageDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(PageDetailView, self).get_context_data(**kwargs)
-        context[self.context_tied_object_name] = self.object.content_object
+        context[self.context_content_object_name] = self.object.content_object
         return context
 
     def get_template_names(self):
