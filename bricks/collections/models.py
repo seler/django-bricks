@@ -75,7 +75,7 @@ class CollectionObject(models.Model):
         blank=True,
         null=True,
         verbose_name=_(u"to date"))
-    order = models.AutoField(
+    order = models.PositiveIntegerField(
         default=0,
         verbose_name=_(u"order"))
 
