@@ -133,7 +133,7 @@ def get_image(image, mode, width, height):
         original_name=image.name, mode=mode, width=width, height=height)
 
     if (created or resized_image.error
-            or not resized_image.resized_name.file
+            or not resized_image.resized_name.name
             or not image.storage.exists(resized_image.resized_name)):
 
         try:
