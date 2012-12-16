@@ -120,15 +120,25 @@ class Image(Brick):
     def basename(self):
         return os.path.basename(self.image.name)
 
+    def picture(self):
+        return self
+
     def get_absolute_url(self):
-        from .image import get_image
-        #FIXME: tą logikę można by przenieść do get_image
-        width = 1920
-        height = 1080
-        if self.width > width or self.height > height:
-            return get_image(self.image, ResizedImage.MODE_SCALE, 1920, 1080)
-        else:
-            return self.image.url
+        try:
+            return self.url
+        except AttributeError:
+            url = super(Image, self).get_absolute_url()
+            if not url:
+                from .image import get_image
+                #FIXME: tą logikę można by przenieść do get_image
+                width = 1920
+                height = 1080
+                if self.width > width or self.height > height:
+                    url = get_image(self.image, ResizedImage.MODE_SCALE, 1920, 1080)
+                else:
+                    url = self.image.url
+            self.url = url
+            return url
 
 
 def fake_upload_to(*args, **kwargs):

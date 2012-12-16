@@ -39,7 +39,7 @@ class Collection(Brick):
             yield relations[item.content_type_id][item.object_id]
 
     def get_absolute_url(self):
-        super(Collection, self).get_absolute_url()
+        return super(Collection, self).get_absolute_url()
 
 
 class CollectionObject(models.Model):

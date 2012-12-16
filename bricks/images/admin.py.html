@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/inzynierka/django-bricks/django-bricks/bricks/images/admin.py.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v10">
+<meta name="syntax" content="python">
+<meta name="settings" content="number_lines,use_css,expand_tabs">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #93a1a1; background-color: #002b36; }
+body { font-family: monospace; color: #93a1a1; background-color: #002b36; }
+.lnr { color: #657b83; background-color: #073642; }
+.Identifier { color: #268bd2; }
+.Special { color: #dc322f; }
+.Type { color: #b58900; }
+.Constant { color: #2aa198; }
+.Normal { color: #93a1a1; background-color: #002b36; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="lnr"> 1 </span>from⠀django<span class="Normal">.</span>contrib⠀import⠀admin
+<span class="lnr"> 2 </span>from⠀django<span class="Normal">.</span>contrib<span class="Normal">.</span>admin⠀import⠀SimpleListFilter
+<span class="lnr"> 3 </span>from⠀django<span class="Normal">.</span>utils<span class="Normal">.</span>translation⠀import⠀ugettext_lazy⠀as⠀_
+<span class="lnr"> 4 </span>
+<span class="lnr"> 5 </span>from⠀bricks<span class="Normal">.</span>admin⠀import⠀PageInlineAdmin
+<span class="lnr"> 6 </span>
+<span class="lnr"> 7 </span>from⠀<span class="Normal">.</span>models⠀import⠀Image,⠀ResizedImage
+<span class="lnr"> 8 </span>from⠀<span class="Normal">.</span>image⠀import⠀crop_image,⠀get_image
+<span class="lnr"> 9 </span>
+<span class="lnr">10 </span>
+<span class="lnr">11 </span>class⠀ImageAdmin(admin<span class="Normal">.</span>ModelAdmin):
+<span class="lnr">12 </span>⠀⠀⠀⠀inlines⠀=⠀[PageInlineAdmin]
+<span class="lnr">13 </span>⠀⠀⠀⠀list_display⠀=⠀[<span class="Constant">'thumbnail'</span>,⠀<span class="Constant">'basename'</span>]
+<span class="lnr">14 </span>
+<span class="lnr">15 </span>⠀⠀⠀⠀def⠀thumbnail(<span class="Type">self</span>,⠀obj):
+<span class="lnr">16 </span>⠀⠀⠀⠀⠀⠀⠀⠀if⠀obj<span class="Normal">.</span>image:
+<span class="lnr">17 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀html⠀=⠀<span class="Constant">&quot;&quot;&quot;&lt;div⠀style=&quot;width:⠀320px;⠀text-align:⠀center;&quot;&gt;&lt;img⠀src=&quot;</span><span class="Special">{0}</span><span class="Constant">&quot;⠀/&gt;&lt;/div&gt;&quot;&quot;&quot;</span>
+<span class="lnr">18 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀return⠀html<span class="Normal">.</span><span class="Identifier">format</span>(get_image(obj<span class="Normal">.</span>image,⠀ResizedImage<span class="Normal">.</span>MODE_ZOOM,⠀<span class="Constant">320</span>,⠀<span class="Constant">180</span>))
+<span class="lnr">19 </span>⠀⠀⠀⠀⠀⠀⠀⠀else:
+<span class="lnr">20 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀return⠀<span class="Constant">&quot;no-image&quot;</span>
+<span class="lnr">21 </span>⠀⠀⠀⠀thumbnail<span class="Normal">.</span>allow_tags⠀=⠀True
+<span class="lnr">22 </span>⠀⠀⠀⠀thumbnail<span class="Normal">.</span>short_description⠀=⠀<span class="Constant">u'thumbnail'</span>
+<span class="lnr">23 </span>
+<span class="lnr">24 </span>
+<span class="lnr">25 </span>class⠀CroppedListFilter(SimpleListFilter):
+<span class="lnr">26 </span>⠀⠀⠀⠀title⠀=⠀_(<span class="Constant">'cropped'</span>)
+<span class="lnr">27 </span>⠀⠀⠀⠀parameter_name⠀=⠀<span class="Constant">'cropped'</span>
+<span class="lnr">28 </span>⠀⠀⠀⠀VAL_CROPPED⠀=⠀<span class="Constant">'1'</span>
+<span class="lnr">29 </span>⠀⠀⠀⠀VAL_NOTCROPPED⠀=⠀<span class="Constant">'0'</span>
+<span class="lnr">30 </span>
+<span class="lnr">31 </span>⠀⠀⠀⠀def⠀lookups(<span class="Type">self</span>,⠀request,⠀model_admin):
+<span class="lnr">32 </span>⠀⠀⠀⠀⠀⠀⠀⠀return⠀(
+<span class="lnr">33 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀(<span class="Type">self</span><span class="Normal">.</span>VAL_CROPPED,⠀_(<span class="Constant">'Cropped'</span>)),
+<span class="lnr">34 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀(<span class="Type">self</span><span class="Normal">.</span>VAL_NOTCROPPED,⠀_(<span class="Constant">'Not⠀cropped'</span>)),
+<span class="lnr">35 </span>⠀⠀⠀⠀⠀⠀⠀⠀)
+<span class="lnr">36 </span>
+<span class="lnr">37 </span>⠀⠀⠀⠀def⠀queryset(<span class="Type">self</span>,⠀request,⠀queryset):
+<span class="lnr">38 </span>⠀⠀⠀⠀⠀⠀⠀⠀val⠀=⠀None
+<span class="lnr">39 </span>⠀⠀⠀⠀⠀⠀⠀⠀if⠀self<span class="Normal">.</span>value()⠀==⠀self<span class="Normal">.</span>VAL_CROPPED:
+<span class="lnr">40 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀val⠀=⠀False
+<span class="lnr">41 </span>⠀⠀⠀⠀⠀⠀⠀⠀if⠀self<span class="Normal">.</span>value()⠀==⠀self<span class="Normal">.</span>VAL_NOTCROPPED:
+<span class="lnr">42 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀val⠀=⠀True
+<span class="lnr">43 </span>⠀⠀⠀⠀⠀⠀⠀⠀if⠀val⠀is⠀not⠀None:
+<span class="lnr">44 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀return⠀queryset<span class="Normal">.</span><span class="Identifier">filter</span>(crop_x1__isnull=val,⠀crop_y1__isnull=val,⠀crop_x2__isnull=val,⠀crop_y2__isnull=val)
+<span class="lnr">45 </span>
+<span class="lnr">46 </span>
+<span class="lnr">47 </span>class⠀ResizedImageAdmin(admin<span class="Normal">.</span>ModelAdmin):
+<span class="lnr">48 </span>⠀⠀⠀⠀list_display⠀=⠀[<span class="Constant">'thumbnail'</span>,⠀<span class="Constant">'original_name'</span>,⠀<span class="Constant">'width'</span>,⠀<span class="Constant">'height'</span>,⠀<span class="Constant">'mode'</span>,⠀<span class="Constant">'cropped'</span>]
+<span class="lnr">49 </span>⠀⠀⠀⠀readonly_fields⠀=⠀[<span class="Constant">'original_name'</span>,⠀<span class="Constant">'resized_name'</span>,⠀<span class="Constant">'width'</span>,⠀<span class="Constant">'height'</span>,⠀<span class="Constant">'mode'</span>,⠀<span class="Constant">'error'</span>]
+<span class="lnr">50 </span>⠀⠀⠀⠀list_filter⠀=⠀[<span class="Constant">'mode'</span>,⠀CroppedListFilter,⠀<span class="Constant">'error'</span>]
+<span class="lnr">51 </span>
+<span class="lnr">52 </span>⠀⠀⠀⠀def⠀thumbnail(<span class="Type">self</span>,⠀obj):
+<span class="lnr">53 </span>⠀⠀⠀⠀⠀⠀⠀⠀if⠀obj<span class="Normal">.</span>resized_name<span class="Normal">.</span>name:
+<span class="lnr">54 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀html⠀=⠀<span class="Constant">&quot;&quot;&quot;&lt;div⠀style=&quot;width:⠀320px;⠀text-align:⠀center;&quot;&gt;</span>
+<span class="lnr">55 </span><span class="Constant">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀&lt;img⠀src=&quot;</span><span class="Special">{0}</span><span class="Constant">&quot;⠀style=&quot;max-width:⠀320px;⠀max-height:⠀180px;&quot;⠀/&gt;&lt;/div&gt;&quot;&quot;&quot;</span>
+<span class="lnr">56 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀return⠀html<span class="Normal">.</span><span class="Identifier">format</span>(obj<span class="Normal">.</span>resized_name<span class="Normal">.</span>url,⠀obj<span class="Normal">.</span>width,⠀obj<span class="Normal">.</span>height)
+<span class="lnr">57 </span>⠀⠀⠀⠀⠀⠀⠀⠀else:
+<span class="lnr">58 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀return⠀<span class="Constant">&quot;no-image&quot;</span>
+<span class="lnr">59 </span>⠀⠀⠀⠀thumbnail<span class="Normal">.</span>allow_tags⠀=⠀True
+<span class="lnr">60 </span>⠀⠀⠀⠀thumbnail<span class="Normal">.</span>short_description⠀=⠀<span class="Constant">u'thumbnail'</span>
+<span class="lnr">61 </span>
+<span class="lnr">62 </span>⠀⠀⠀⠀def⠀save_model(<span class="Type">self</span>,⠀request,⠀obj,⠀form,⠀change):
+<span class="lnr">63 </span>⠀⠀⠀⠀⠀⠀⠀⠀if⠀obj<span class="Normal">.</span>cropped():
+<span class="lnr">64 </span>⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀obj<span class="Normal">.</span>resized_name⠀=⠀crop_image(obj<span class="Normal">.</span>original_name,⠀obj<span class="Normal">.</span>width,⠀obj<span class="Normal">.</span>height,⠀obj<span class="Normal">.</span>crop_x1,⠀obj<span class="Normal">.</span>crop_y1,⠀obj<span class="Normal">.</span>crop_x2,⠀obj<span class="Normal">.</span>crop_y2)
+<span class="lnr">65 </span>⠀⠀⠀⠀⠀⠀⠀⠀obj<span class="Normal">.</span>save()
+<span class="lnr">66 </span>
+<span class="lnr">67 </span>
+<span class="lnr">68 </span>admin<span class="Normal">.</span>site<span class="Normal">.</span>register(Image,⠀ImageAdmin)
+<span class="lnr">69 </span>admin<span class="Normal">.</span>site<span class="Normal">.</span>register(ResizedImage,⠀ResizedImageAdmin)
+</pre>
+</body>
+</html>

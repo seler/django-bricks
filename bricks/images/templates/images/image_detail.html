@@ -1,5 +1,5 @@
 {% load image %}
 
-<div><img src="{% image object.image.name 200x150 crop %}" /><p>original image</p></div>
-<img src="{% image object.image.name 200x150 reduce %}" />
-<img src="{% image object.image.name 200x150 stretch %}" />
+<img src="{% image object.image 512x256 zoom %}" />
+<img src="{% image object.image 512x256 scale %}" />
+<img src="{% image object.image 512x256 stretch %}" />

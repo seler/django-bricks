@@ -78,8 +78,14 @@ class Page(MPTTModel, PublicationAbstract):
     class MPTTMeta:
         order_insertion_by = ['title']
 
-    def get_absolute_url(self):
+    def __unicode__(self):
+        return self.title
 
+    def get_absolute_url(self):
+        path = '/'
+        for p in self.get_ancestors(include_self=True, ascending=False):
+            path += p.slug + '/'
+        return path
 
 
 TEMPLATE_NAME_FIELD = None
@@ -135,17 +141,25 @@ class Brick(PublicationAbstract):
         template_name_suffix = TEMPLATE_NAME_SUFFIX
 
     def get_absolute_url(self):
-        classes = [self.__class__] + list(inheritors(self.__class__))
-        content_types = ContentType.objects.get_for_models(*classes)
-        for ct in content_types:
-            try:
-                page = Page.objects.get(content_type=ct, object_id=self.id)
-            except Page.DoesNotExist:
-                continue
+        try:
+            return self.url
+        except AttributeError:
+            classes = [self.__class__] + list(inheritors(self.__class__))
+            content_types = ContentType.objects.get_for_models(*classes)
+            content_types = content_types.values()
+            content_types = [
+                ContentType.objects.filter(app_label=klass._meta.app_label, model=klass._meta.object_name.lower()) for klass in classes
+            ]
+            for ct in content_types:
+                try:
+                    page = Page.objects.get(content_type=ct, object_id=self.id)
+                except Page.DoesNotExist:
+                    continue
+                else:
+                    self.url = page.get_absolute_url()
+                    return self.url
             else:
-                return page.get_absolute_url()
-        else:
-            return ""
+                return ""
 
 
 """
