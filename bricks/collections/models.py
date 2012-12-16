@@ -17,12 +17,28 @@ class Collection(Brick):
         max_length=64,
         verbose_name=_(u"template name"))
 
+    ORDER_BY_DATE_ASC = 'from_date'
+    ORDER_BY_DATE_DESC = '-from_date'
+    ORDER_BY_ORDER_ASC = 'order'
+    ORDER_BY_ORDER_DESC = '-order'
+    ORDER_BY_CHOICES = (
+        (ORDER_BY_DATE_ASC, _("date, ascending")),
+        (ORDER_BY_DATE_DESC, _("date, descending")),
+        (ORDER_BY_ORDER_ASC, _("order, ascending")),
+        (ORDER_BY_ORDER_DESC, _("order, descending")),
+    )
+
+    order_by = models.CharField(
+        choices=ORDER_BY_CHOICES,
+        max_length=32,
+        verbose_name=_(u"order by"))
+
     class Meta:
         verbose_name = _(u"collection")
         verbose_name_plural = _(u"collections")
 
     def get_objects(self):
-        collection_objects = list(self.collection_objects.published())
+        collection_objects = list(self.collection_objects.published().order_by(self.order_by))
 
         generics = {}
         for item in collection_objects:
@@ -59,6 +75,9 @@ class CollectionObject(models.Model):
         blank=True,
         null=True,
         verbose_name=_(u"to date"))
+    order = models.AutoField(
+        default=0,
+        verbose_name=_(u"order"))
 
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()

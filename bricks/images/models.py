@@ -75,7 +75,6 @@ post_syncdb.connect(
 
 
 class Gallery(Collection):
-
     class Meta(Collection.Meta):
         verbose_name = _(u"gallery")
         verbose_name_plural = _(u"galleries")
