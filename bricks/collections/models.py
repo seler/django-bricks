@@ -22,11 +22,11 @@ class Collection(Brick):
         verbose_name_plural = _(u"collections")
 
     def get_objects(self):
-        queryset = self.collection_objects.published()
+        collection_objects = list(self.collection_objects.published())
 
         generics = {}
-        for item in queryset:
-            generics.setdefault(item.content_type_id, set()).add(item.object_id)
+        for item in collection_objects:
+            generics.setdefault(item.content_type_id, list()).append(item.object_id)
 
         content_types = ContentType.objects.in_bulk(generics.keys())
 
@@ -35,8 +35,7 @@ class Collection(Brick):
             ct_model = content_types[ct].model_class()
             relations[ct] = ct_model.objects.in_bulk(list(fk_list))
 
-        for item in queryset:
-            yield relations[item.content_type_id][item.object_id]
+        return [relations[item.content_type_id][item.object_id] for item in collection_objects]
 
     def get_absolute_url(self):
         return super(Collection, self).get_absolute_url()
