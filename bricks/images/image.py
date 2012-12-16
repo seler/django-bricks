@@ -8,7 +8,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from StringIO import StringIO
 from django.core.files.base import ContentFile
-from django.db.models.fields.files import FileField
+#from django.db.models.fields.files import FileField
 
 
 register = template.Library()
@@ -27,9 +27,15 @@ def generate_image_path(mode, width, height, path):
 IMAGE_ERROR_TEXT = u"NO IMAGE"
 
 
-def generate_error_image(image, mode, width, height):
+def generate_error_image(image, mode, width=None, height=None):
 
     image_path = generate_image_path('error', width, height, image.name)
+
+    if width is None:
+        width = height
+    if height is None:
+        height = width
+
     im = Image.new('RGB', (width, height), (255, 255, 255))
     draw = ImageDraw.Draw(im)
 
@@ -59,10 +65,13 @@ def generate_error_image(image, mode, width, height):
 
     image_path_saved = image.storage.save(image_path, cf)
 
-    return image_path_saved
+    return image_path_saved, width, height
 
 
 def resize_image(image, mode, width, height):
+    if width is None and height is None:
+        raise ValueError("width and height are both None")
+
     original_width, original_height = image.size
 
     ratio = 1.0
@@ -98,7 +107,7 @@ def resize_image(image, mode, width, height):
     return image.resize(map(int, (width, height)), Image.ANTIALIAS).copy()
 
 
-def create_image(image, mode, width, height):
+def create_image(image, mode, width=None, height=None):
     if not image.storage.exists(image):
         raise IOError('Image does not exists in storage')
 
@@ -106,6 +115,13 @@ def create_image(image, mode, width, height):
 
     image.open()
     im = Image.open(image)
+
+    original_width, original_height = im.size
+
+    if width is None:
+        width = original_width * height / original_height
+    if height is None:
+        height = original_height * width / original_width
 
     new_im = resize_image(im, mode, width, height)
 
@@ -116,10 +132,10 @@ def create_image(image, mode, width, height):
     fp.seek(0)
     cf = ContentFile(fp.read())
 
-    return image.storage.save(new_image_name, cf)
+    return image.storage.save(new_image_name, cf), width, height
 
 
-def get_image(image, mode, width, height):
+def get_image(image, mode, width=None, height=None):
     if isinstance(image, BricksImage):
         image = image.image
     """
@@ -128,19 +144,37 @@ def get_image(image, mode, width, height):
         #raise Exception("image object must be instance of FieldFile class")
     """
     if not image:
-        raise Exception("no image")
-    resized_image, created = ResizedImage.objects.get_or_create(
-        original_name=image.name, mode=mode, width=width, height=height)
+        raise ValueError("no image")
+
+    if width is None and height is None:
+        raise ValueError("width and height are both None")
+
+    filters = {}
+    if width is not None:
+        filters['width'] = width
+    if height is not None:
+        filters['height'] = height
+    if width is None:
+        filters['auto_width'] = True
+    if height is None:
+        filters['auto_height'] = True
+
+    created = False
+    try:
+        resized_image = ResizedImage.objects.get(original_name=image.name, mode=mode, **filters)
+    except ResizedImage.DoesNotExist:
+        resized_image = ResizedImage(original_name=image.name, mode=mode, **filters)
+        created = True
 
     if (created or resized_image.error
             or not resized_image.resized_name.name
             or not image.storage.exists(resized_image.resized_name)):
 
         try:
-            resized_image.resized_name = create_image(image, mode, width, height)
+            resized_image.resized_name, resized_image.width, resized_image.height = create_image(image, mode, width, height)
             resized_image.error = None
         except IOError as e:
-            resized_image.resized_name = generate_error_image(image, mode, width, height)
+            resized_image.resized_name, resized_image.width, resized_image.height = generate_error_image(image, mode, width, height)
             resized_image.error = e.message
         resized_image.save()
 

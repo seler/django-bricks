@@ -172,9 +172,17 @@ class ResizedImage(models.Model):
     width = models.IntegerField(
         editable=False,
         verbose_name=_(u"width"))
+    auto_width = models.BooleanField(
+        default=False,
+        editable=False,
+        verbose_name=_(u"auto width"))
     height = models.IntegerField(
         editable=False,
         verbose_name=_(u"height"))
+    auto_height = models.BooleanField(
+        default=False,
+        editable=False,
+        verbose_name=_(u"auto height"))
     error = models.CharField(
         blank=True,
         null=True,

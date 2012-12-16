@@ -81,8 +81,8 @@ def image(parser, token):
         return ImageNode(image)
     if len(bits) == 4 and bits[3] == 'as':
         return ImageNode(image, context_name=bits[4])
-    if re.match('^\d+[^\d]+\d+$', bits[2]) and len(bits) in (4, 6) and bits[3] in modes:
-        width, height = map(int, re.split('[^\d]+', bits[2]))
+    if re.match('^\d*[^\d\s]+\d*$', bits[2]) and len(bits) in (4, 6) and bits[3] in modes:
+        width, height = map(lambda a: int(a) if a else None, re.split('[^\d]+', bits[2]))
         if bits[-2] == 'as':
             context_name = bits[-2]
         else:

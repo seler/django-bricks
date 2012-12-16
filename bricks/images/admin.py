@@ -21,7 +21,7 @@ class ImageAdmin(admin.ModelAdmin):
     def thumbnail(self, obj):
         if obj.image:
             html = """<div style="width: 320px; text-align: center;"><img src="{0}" /></div>"""
-            return html.format(get_image(obj.image, ResizedImage.MODE_ZOOM, 320, 180))
+            return html.format(get_image(obj.image, ResizedImage.MODE_ZOOM, width=320))
         else:
             return "no-image"
     thumbnail.allow_tags = True
