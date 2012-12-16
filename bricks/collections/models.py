@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
@@ -9,11 +10,15 @@ from bricks.models import Brick
 from .managers import CollectionObjectManager
 
 
+COLLECTIONS_TEMPLATE_NAME_CHOICES = getattr(settings, 'BRICK_COLLECTIONS_TEMPLATE_NAME_CHOICES', None)
+
+
 class Collection(Brick):
 
     template_name = models.CharField(
         blank=True,
         null=True,
+        choices=COLLECTIONS_TEMPLATE_NAME_CHOICES,
         max_length=64,
         verbose_name=_(u"template name"))
 
@@ -36,6 +41,7 @@ class Collection(Brick):
     class Meta:
         verbose_name = _(u"collection")
         verbose_name_plural = _(u"collections")
+        template_name_field = "template_name"
 
     def get_objects(self):
         collection_objects = list(self.collection_objects.published().order_by(self.order_by))

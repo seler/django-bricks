@@ -88,7 +88,7 @@ class Video(Brick):
         verbose_name_plural = _(u'filmy')
 
     def __unicode__(self):
-        return self.name
+        return self.title
 
     def _calculate_ratio(self):
         """

@@ -59,11 +59,31 @@ def clean_files(*filenames):
             pass
 
 
+def which(program):
+    import os
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+
 def retrieve_info(filename):
     u"""
     Returns tuple of codec, width and height of given video file
     """
     logger.info('pobieram dane o pliku %s' % filename)
+
     params = {
         'ffmpeg': getattr(settings, 'FFMPEG', '/usr/bin/ffmpeg'),
         'filename': filename,
@@ -260,6 +280,10 @@ def process_video_task(object_id, formats=None):
         process_video_task.update_state(state='PROGRESS', meta=meta)
         time.sleep(20)
     """
+    ffmpeg = which(getattr(settings, 'FFMPEG', 'fmpeg'))
+    if not ffmpeg:
+        raise Exception("ffmpeg not installed")
+
     if formats is None:
         formats = settings.BRICKS_DEFAULT_CONVERTEDVIDEO_FORMATS
 

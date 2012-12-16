@@ -125,17 +125,16 @@ class Brick(PublicationAbstract):
         template_name_suffix = getattr(self._meta, 'template_name_suffix', TEMPLATE_NAME_SUFFIX)
         template_name_field = getattr(self._meta, 'template_name_field', TEMPLATE_NAME_FIELD)
         if template_name_field:
-            name = getattr(self.object, template_name_field, None)
+            name = getattr(self, template_name_field, None)
             if name:
                 names.append(name)
-        else:
-            template_name = "%s/%s%s.html" % (
-                self._meta.app_label,
-                self._meta.object_name.lower(),
-                template_name_suffix,
-            )
-            names.append(template_name)
-            names.append("bricks/brick/brick_detail.html")
+        template_name = "%s/%s%s.html" % (
+            self._meta.app_label,
+            self._meta.object_name.lower(),
+            template_name_suffix,
+        )
+        names.append(template_name)
+        names.append("bricks/brick/brick_detail.html")
 
         return names
         template_name_suffix = TEMPLATE_NAME_SUFFIX
