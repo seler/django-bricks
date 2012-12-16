@@ -24,7 +24,7 @@ def generate_image_path(mode, width, height, path):
                         '{0}x{1}'.format(width, height),
                         os.path.basename(path))
 
-IMAGE_ERROR_TEXT = u"BRAK ZDJĘCIA"
+IMAGE_ERROR_TEXT = u"NO IMAGE"
 
 
 def generate_error_image(image, mode, width, height):
@@ -39,7 +39,7 @@ def generate_error_image(image, mode, width, height):
     draw.line((0, height - 1, width - 1, 0), fill=color)
     draw.rectangle((0, 0, width - 1, height - 1), outline=color)
 
-    font_path = finders.find("bricks/DejaVuSansMono.ttf")
+    font_path = finders.find("bricks/fonts/DejaVuSansMono.ttf")
     font = ImageFont.truetype(font_path, 15)
     text = "{0}x{1}".format(width, height)
     text_pos = (width / 2. - font.getsize(text)[0] / 2. - 1, height / 1.25 - font.getsize(text)[1] / 2. - 1)
@@ -132,7 +132,10 @@ def get_image(image, mode, width, height):
     resized_image, created = ResizedImage.objects.get_or_create(
         original_name=image.name, mode=mode, width=width, height=height)
 
-    if created or resized_image.error or not image.storage.exists(resized_image.resized_name):
+    if (created or resized_image.error
+            or not resized_image.file
+            or not image.storage.exists(resized_image.resized_name)):
+
         try:
             resized_image.resized_name = create_image(image, mode, width, height)
             resized_image.error = None
