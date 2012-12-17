@@ -16,9 +16,16 @@ import django.db.models.options as options
 options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('template_name_field', 'template_name_suffix')
 
 
+YES_NO_CHOICES = (
+    (True, _('Yes')),
+    (False, _('No')),
+)
+
+
 class PublicationAbstract(models.Model):
     is_active = models.BooleanField(
         default=True,
+        choices=YES_NO_CHOICES,
         verbose_name=_('is active'))
     add_date = models.DateTimeField(
         auto_now_add=True,

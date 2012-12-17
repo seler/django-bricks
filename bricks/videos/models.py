@@ -128,7 +128,7 @@ class Video(Brick):
         Returns ConvertedVideo in default format.
         """
         if format is None:
-            format = settings.DEFAULT_VIDEO_FORMAT
+            format = settings.BRICKS_DEFAULT_CONVERTEDVIDEO_FORMAT
             try:
                 return self.converted_videos.filter(format=format).get()
             except ConvertedVideo.DoesNotExist:
@@ -138,12 +138,12 @@ class Video(Brick):
             return None
 
     def get_player_width(self):
-        return settings.DEFAULT_FORMAT['width']
+        return settings.BRICKS_DEFAULT_FORMAT['width']
 
     def get_player_height(self):
         if self.aspect_ratio:
             return int(round(self.get_player_width() / self.aspect_ratio))
-        return settings.DEFAULT_FORMAT['height']
+        return settings.BRICKS_DEFAULT_FORMAT['height']
 
     def delete(self, *args, **kwargs):
         if self.file:
