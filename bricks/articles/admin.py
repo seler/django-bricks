@@ -3,11 +3,7 @@ from django.contrib import admin
 from bricks.admin import PageInlineAdmin
 from bricks.collections.admin import CollectionObjectInlineAdmin
 
-from .models import Article, ArticleSection, ArticleSectionType
-
-
-class ArticleSectionTypeAdmin(admin.ModelAdmin):
-    pass
+from .models import Article, ArticleSection
 
 
 class ArticleSectionInlineAdmin(admin.StackedInline):
@@ -21,4 +17,3 @@ class ArticleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Article, ArticleAdmin)
-admin.site.register(ArticleSectionType, ArticleSectionTypeAdmin)

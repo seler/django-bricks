@@ -62,7 +62,10 @@ class ArticleSection(models.Model):
         choices=ARTICLE_SECTION_TYPE_CHOICES,
         default=ARTICLE_SECTION_TYPE_DEFAULT,
         verbose_name=_(u"article section type"))
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_(u"object id"))
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     order = models.PositiveIntegerField(
         default=0,
