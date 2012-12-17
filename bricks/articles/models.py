@@ -7,8 +7,16 @@ from django.utils.translation import ugettext_lazy as _
 from bricks.models import Brick
 
 
-ARTICLE_SECTION_TYPE_TEMPLATE_NAME_CHOICES = getattr(settings, 'BRICK_ARTICLE_SECTION_TYPE_TEMPLATE_NAME_CHOICES', None)
-ARTICLE_TEMPLATE_NAME_CHOICES = getattr(settings, 'BRICK_ARTICLE_TEMPLATE_NAME_CHOICES', None)
+ARTICLE_SECTION_TYPE_TEMPLATE_NAME_CHOICES = \
+    getattr(settings, 'BRICK_ARTICLE_SECTION_TYPE_TEMPLATE_NAME_CHOICES', None)
+ARTICLE_TEMPLATE_NAME_CHOICES = \
+    getattr(settings, 'BRICK_ARTICLE_TEMPLATE_NAME_CHOICES', None)
+ARTICLE_SECTION_TYPES = \
+    getattr(settings, 'BRICKS_ARTICLE_SECTION_TYPES', dict())
+ARTICLE_SECTION_TYPE_CHOICES = \
+    tuple([(key, value['name']) for key, value in ARTICLE_SECTION_TYPES.items()])
+ARTICLE_SECTION_TYPE_DEFAULT = \
+    getattr(settings, 'BRICKS_ARTICLE_SECTION_TYPE_DEFAULT', None)
 
 
 class Article(Brick):
@@ -45,31 +53,14 @@ class Article(Brick):
         return super(Article, self).get_absolute_url()
 
 
-class ArticleSectionType(models.Model):
-    content_type = models.ForeignKey(
-        to=ContentType,
-        blank=True,
-        null=True)
-    template_name = models.CharField(
-        blank=True,
-        null=True,
-        choices=ARTICLE_SECTION_TYPE_TEMPLATE_NAME_CHOICES,
-        max_length=64,
-        verbose_name=_(u"template name"))
-
-    class Meta:
-        verbose_name = _(u"article section type")
-        verbose_name_plural = _(u"article section types")
-        template_name_field = "template_name"
-
-
 class ArticleSection(models.Model):
     article = models.ForeignKey(
         related_name="article_sections",
         to=Article,
         verbose_name=_(u"article"))
-    article_section_type = models.ForeignKey(
-        to=ArticleSectionType,
+    article_section_type = models.PositiveIntegerField(
+        choices=ARTICLE_SECTION_TYPE_CHOICES,
+        default=ARTICLE_SECTION_TYPE_DEFAULT,
         verbose_name=_(u"article section type"))
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
