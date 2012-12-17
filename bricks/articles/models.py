@@ -33,21 +33,37 @@ class Article(Brick):
         verbose_name_plural = _(u"articles")
         template_name_field = "template_name"
 
-    def get_objects(self):
-        collection_objects = list(self.collection_objects.published().order_by(self.order_by))
+    @property
+    def sections(self):
+        try:
+            return self._sections
+        except AttributeError:
+            self._sections = self.get_sections()
+            return self._sections
+
+    def get_sections(self):
+        article_sections = list(self.article_sections.all())
+        from django.db.models.loading import get_model
 
         generics = {}
-        for item in collection_objects:
-            generics.setdefault(item.content_type_id, list()).append(item.object_id)
-
-        content_types = ContentType.objects.in_bulk(generics.keys())
+        for item in article_sections:
+            if item.object_id:
+                generics.setdefault(item.article_section_type, list()).append(item.object_id)
 
         relations = {}
-        for ct, fk_list in generics.items():
-            ct_model = content_types[ct].model_class()
-            relations[ct] = ct_model.objects.in_bulk(list(fk_list))
+        for article_section_type, fk_list in generics.items():
+            section_type = ARTICLE_SECTION_TYPES[article_section_type]
+            model_class = get_model(section_type['app_label'], section_type['model_name'])
+            relations[article_section_type] = model_class.objects.in_bulk(list(fk_list))
 
-        return [relations[item.content_type_id][item.object_id] for item in collection_objects]
+        sections = []
+        for item in article_sections:
+            section = ARTICLE_SECTION_TYPES[item.article_section_type]
+            if item.object_id:
+                section['object'] = relations[item.article_section_type][item.object_id]
+            section['text'] = item.text
+            sections.append(section)
+        return sections
 
     def get_absolute_url(self):
         return super(Article, self).get_absolute_url()
@@ -58,9 +74,10 @@ class ArticleSection(models.Model):
         related_name="article_sections",
         to=Article,
         verbose_name=_(u"article"))
-    article_section_type = models.PositiveIntegerField(
+    article_section_type = models.CharField(
         choices=ARTICLE_SECTION_TYPE_CHOICES,
         default=ARTICLE_SECTION_TYPE_DEFAULT,
+        max_length=32,
         verbose_name=_(u"article section type"))
     object_id = models.PositiveIntegerField(
         blank=True,
@@ -77,3 +94,4 @@ class ArticleSection(models.Model):
     class Meta:
         verbose_name = _(u"article section")
         verbose_name_plural = _(u"articles section")
+        ordering = ['order', 'id']

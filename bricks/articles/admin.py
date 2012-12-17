@@ -14,6 +14,7 @@ class ArticleSectionInlineAdmin(admin.StackedInline):
 class ArticleAdmin(admin.ModelAdmin):
     inlines = [PageInlineAdmin, ArticleSectionInlineAdmin, CollectionObjectInlineAdmin]
     prepopulated_fields = {"slug": ("title",)}
+    raw_id_fields = ('picture', )
 
 
 admin.site.register(Article, ArticleAdmin)
