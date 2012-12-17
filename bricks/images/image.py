@@ -8,6 +8,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from StringIO import StringIO
 from django.core.files.base import ContentFile
+from django.core.exceptions import MultipleObjectsReturned
 #from django.db.models.fields.files import FileField
 
 
@@ -160,15 +161,19 @@ def get_image(image, mode, width=None, height=None):
         filters['auto_height'] = True
 
     created = False
+    resized_image_queryset = ResizedImage.objects.filter(original_name=image.name, mode=mode, **filters).order_by('-id')
     try:
-        resized_image = ResizedImage.objects.get(original_name=image.name, mode=mode, **filters)
+        resized_image = resized_image_queryset.get()
+    except MultipleObjectsReturned:
+        resized_image = resized_image_queryset[:1].get()
+        map(lambda r: r.delete(), resized_image_queryset[1:])
     except ResizedImage.DoesNotExist:
         resized_image = ResizedImage(original_name=image.name, mode=mode, **filters)
         created = True
 
     if (created or resized_image.error
-            or not resized_image.resized_name.name
-            or not image.storage.exists(resized_image.resized_name)):
+            or not resized_image.resized_name.name):
+            #or not image.storage.exists(resized_image.resized_name)):
 
         try:
             resized_image.resized_name, resized_image.width, resized_image.height = create_image(image, mode, width, height)

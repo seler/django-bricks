@@ -90,6 +90,9 @@ class Video(Brick):
     def __unicode__(self):
         return self.title
 
+    def picture(self):
+        return self.screenshot
+
     def _calculate_ratio(self):
         """
         Calculates aspect ratio and returns closest value from

@@ -20,7 +20,7 @@ class ImageAdmin(admin.ModelAdmin):
 
     def thumbnail(self, obj):
         if obj.image:
-            html = """<div style="width: 320px; text-align: center;"><img src="{0}" /></div>"""
+            html = u"""<div style="width: 320px; text-align: center;"><img src="{0}" /></div>"""
             return html.format(get_image(obj.image, ResizedImage.MODE_ZOOM, width=320))
         else:
             return "no-image"
@@ -57,7 +57,7 @@ class ResizedImageAdmin(admin.ModelAdmin):
 
     def thumbnail(self, obj):
         if obj.resized_name.name:
-            html = """<div style="width: 320px; text-align: center;">
+            html = u"""<div style="width: 320px; text-align: center;">
             <img src="{0}" style="max-width: 320px; max-height: 180px;" /></div>"""
             return html.format(obj.resized_name.url, obj.width, obj.height)
         else:

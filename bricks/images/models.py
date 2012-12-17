@@ -22,7 +22,7 @@ from django.contrib.auth.management import create_permissions, _get_all_permissi
 # assignment to the proxy models.
 # see http://code.djangoproject.com/ticket/11154
 
-
+"""
 def create_permissions_respecting_proxy(app, created_models, verbosity, **kwargs):
 
     if not kwargs['sender'].__name__ == 'bricks.images.models':
@@ -72,7 +72,7 @@ post_syncdb.connect(
     create_permissions_respecting_proxy,
     dispatch_uid='django.contrib.auth.management.create_permissions',
 )
-
+"""
 
 class Gallery(Collection):
     class Meta(Collection.Meta):

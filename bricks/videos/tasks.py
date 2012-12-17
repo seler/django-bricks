@@ -207,6 +207,7 @@ def convert_format(filename, format_id, width, height, ext, command):
 
     result = process.communicate()[0]
     logger.info(result)
+    logger.info("srutu tutu 2")
 
     command2 = "{qtfaststart:s} {infile:s} {outfile:s}".format(qtfaststart=getattr(settings, 'QT_FASTSTART', '/usr/bin/qt-faststart'),
                                                               infile=no_faststart_filename,
@@ -219,6 +220,7 @@ def convert_format(filename, format_id, width, height, ext, command):
 
 
 def save_format(format, filename, obj, width, height, ext, command):
+    logger.info("save format")
     from .models import ConvertedVideo
     format_filename = convert_format(filename, format,
                                      width,
@@ -235,12 +237,17 @@ def save_format(format, filename, obj, width, height, ext, command):
 
 def save_formats(formats, filename, obj):
     # generowanie formatów video
+    logger.info("generowanie formatów video")
+
     formats_dict = settings.BRICKS_VIDEO_FORMATS
     format_filenames = []
     for i, d in formats_dict.items():
+        logger.info("generowanie formatu")
         obj_formats_qs = obj.converted_videos.all()
-        obj_formats = obj_formats_qs.values_list('format', flat=True)
+        obj_formats = list(obj_formats_qs.values_list('format', flat=True))
+        logger.info("i:{0}, formats:{1}, obj_formats:{2}".format(i, formats, obj_formats))
         if i in formats and i not in obj_formats:
+            logger.info("srutu tutu")
             format_width = d[obj.aspect_ratio]['width']
             format_height = d[obj.aspect_ratio]['height']
             if format_width <= obj.width and format_height <= obj.height:
@@ -281,8 +288,8 @@ def process_video_task(object_id, formats=None):
         time.sleep(20)
     """
     ffmpeg = which(getattr(settings, 'FFMPEG', 'fmpeg'))
-    if not ffmpeg:
-        raise Exception("ffmpeg not installed")
+    #if not ffmpeg:
+    #    raise Exception("ffmpeg not installed")
 
     if formats is None:
         formats = settings.BRICKS_DEFAULT_CONVERTEDVIDEO_FORMATS
@@ -298,6 +305,7 @@ def process_video_task(object_id, formats=None):
     filename = fetch_file(obj)
 
     # pobieram info o pliku
+    logger.info("pobieram info o pliku")
     codec, width, height, duration = retrieve_info(filename)
     obj.codec = codec
     obj.width = width
@@ -306,19 +314,24 @@ def process_video_task(object_id, formats=None):
     obj.aspect_ratio = obj._calculate_ratio()
 
     # generowanie screena
+    logger.info("generowanie screena")
     screenshot_filename = save_screenshot(filename, obj)
 
     # zapisanie całości zmian
+    logger.info("zapisanie całości zmian")
     obj.save()
 
     # generowanie formatów video
+    logger.info("generowanie formatów video")
     format_filenames = save_formats(formats, filename, obj)
     # sprzątnięcie zbędnych plików w tempie
+    logger.info("sprzątnięcie zbędnych plików w tempie")
     no_faststart_filenames = [u'%s_nofaststart%s' % os.path.splitext(name) for name in format_filenames]
     format_filenames.extend(no_faststart_filenames)
     clean_files(filename, screenshot_filename, *format_filenames)
 
     # oznaczenie jako skonwertowany
+    logger.info("oznaczenie jako skonwertowany")
     obj.ready = True
     obj.save()
 
