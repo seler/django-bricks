@@ -58,7 +58,7 @@ class Article(Brick):
 
         sections = []
         for item in article_sections:
-            section = ARTICLE_SECTION_TYPES[item.article_section_type]
+            section = ARTICLE_SECTION_TYPES[item.article_section_type].copy()
             if item.object_id:
                 section['object'] = relations[item.article_section_type][item.object_id]
             section['text'] = item.text
