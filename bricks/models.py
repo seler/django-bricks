@@ -65,9 +65,8 @@ class Page(MPTTModel, PublicationAbstract):
     slug = models.SlugField(
         verbose_name=_(u"slug"))
 
-    description = models.CharField(
+    description = models.TextField(
         blank=True,
-        max_length=1024,
         null=True,
         verbose_name=_(u"description"))
 
@@ -107,9 +106,8 @@ class Brick(PublicationAbstract):
     slug = models.SlugField(
         verbose_name=_(u"slug"))
 
-    description = models.CharField(
+    description = models.TextField(
         blank=True,
-        max_length=1024,
         null=True,
         verbose_name=_(u"description"))
 

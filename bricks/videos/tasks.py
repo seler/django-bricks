@@ -142,7 +142,7 @@ def capture_screenshot(filename, time, width, height):
     return screenshot_filename
 
 
-def save_screenshot(filename, obj, delete=False):
+def save_screenshot(filename, obj, time=None, delete=False):
     # generowanie screena
     screenshot_filename = capture_screenshot(filename, obj.screenshot_time,
                                    obj.width, obj.height)
@@ -273,7 +273,7 @@ def process_video(object_id, formats=None):
     """
     TODO: zdecydowac czy ma isc asynchronicznie czy synchronicznie
     """
-    process_video_task.delay(object_id, formats=formats)
+    return process_video_task.delay(object_id, formats=formats)
 
 
 @task()

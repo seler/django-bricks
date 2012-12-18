@@ -14,7 +14,7 @@ if USE_TINYMCE:
 
 class ArticleSectionForm(forms.ModelForm):
     if USE_TINYMCE:
-        text = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}))
+        text = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}), required=False)
 
     class Meta:
         model = ArticleSection

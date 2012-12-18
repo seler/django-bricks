@@ -16,6 +16,7 @@ from .models import Video, ConvertedVideo
 #from django.forms.widgets import CheckboxInput, FILE_INPUT_CONTRADICTION
 from django.core.files.storage import get_storage_class
 from bricks.admin import PageInlineAdmin
+from bricks.collections.admin import CollectionObjectInlineAdmin
 
 
 safe_storage = get_storage_class(settings.DEFAULT_FILE_STORAGE)()
@@ -79,14 +80,28 @@ class UploadifyInput(forms.ClearableFileInput):
         return upload
 """
 
+from bricks import USE_TINYMCE
+if USE_TINYMCE:
+    from tinymce.widgets import TinyMCE
+
+from django import forms
+
+
+class VideoAdminForm(forms.ModelForm):
+    if USE_TINYMCE:
+        description = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}), required=False)
+
+    class Meta:
+        model = Video
+
 
 class VideoAdmin(admin.ModelAdmin):
-    #form = VideoForm
-    inlines = (PageInlineAdmin, ConvertedVideoInlineAdmin,)
+    form = VideoAdminForm
+    inlines = (PageInlineAdmin, ConvertedVideoInlineAdmin, CollectionObjectInlineAdmin)
     prepopulated_fields = {"slug": ("title",)}
     list_display = ('id', 'title')
     search_fields = ('title',)
-    #actions = ['force_convert']
+    actions = ['force_convert']
 
     """
     formfield_overrides = {
@@ -103,6 +118,17 @@ class VideoAdmin(admin.ModelAdmin):
         else:
             return super(VideoAdmin, self).save_model(request, obj, form,
                                                       change, *args, **kwargs)
+
+    def force_convert(self, request, queryset):
+        for video in queryset:
+            video.ready = False
+            video.save()
+            video.converted_videos.all().delete()
+            video.process_video()
+            self.message_user(request, u'Ponowne konwertowanie wybranych filmów.')
+    force_convert.short_description = u'Ponowna konwersja filmu'
+
+
 """
 def save_related(self, request, form, formsets, change):
     super(VideoAdmin, self).save_related(request, form, formsets, change)

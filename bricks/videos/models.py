@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from bricks.models import Brick
 #from .managers import VideosManager
-from .tasks import process_video
+from .tasks import process_video, capture_screenshot_task
 
 
 safe_storage_class = get_storage_class(settings.DEFAULT_FILE_STORAGE)
@@ -110,7 +110,7 @@ class Video(Brick):
         """
         #TODO
         assert self.id is not None, 'Video object has not been saved!'
-        #return capture_frame_task.delay(self.id)
+        return capture_screenshot_task.delay(self.id)
 
     def process_video(self):
         u"""
