@@ -57,7 +57,7 @@ class Collection(Brick):
             ct_model = content_types[ct].model_class()
             relations[ct] = ct_model.objects.in_bulk(list(fk_list))
 
-        return [relations[item.content_type_id][item.object_id] for item in collection_objects]
+        return [relations[item.content_type_id][item.object_id] for item in collection_objects if item.object_id in relations[item.content_type_id]]
 
     def get_absolute_url(self):
         return super(Collection, self).get_absolute_url()
@@ -90,3 +90,9 @@ class CollectionObject(models.Model):
     content_object = generic.GenericForeignKey('content_type', 'object_id')
 
     objects = CollectionObjectManager()
+
+    def __unicode__(self):
+        try:
+            return self.content_object.__unicode__()
+        except AttributeError:
+            return "{0} {1}".format(self.content_type.name, self.object_id)
